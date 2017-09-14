@@ -21,18 +21,20 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/status_cw"
-        tools:layout_editor_absoluteY="78dp" />
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
 
     <Button
         android:id="@+id/sendBtn"
-        android:layout_width="wrap_content"
+        android:layout_width="88dp"
         android:layout_height="52dp"
         android:layout_marginRight="41dp"
         android:layout_marginTop="27dp"
         android:elevation="0dp"
         android:text="Toot!"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/status_compose" />
+        app:layout_constraintTop_toBottomOf="@+id/status_compose"
+        android:layout_marginEnd="41dp" />
 
     <ImageButton
         android:id="@+id/add_photo"
@@ -43,17 +45,19 @@
         android:text="Button"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/status_compose"
-        app:srcCompat="@drawable/ic_photo_camera_black_24dp" />
+        app:srcCompat="@drawable/ic_photo_camera_black_24dp"
+        android:layout_marginStart="42dp" />
 
     <ImageButton
         android:id="@+id/privacy"
         android:layout_width="52dp"
         android:layout_height="52dp"
-        android:layout_marginLeft="11dp"
+        android:layout_marginLeft="12dp"
         android:layout_marginTop="27dp"
         app:layout_constraintLeft_toRightOf="@+id/add_photo"
         app:layout_constraintTop_toBottomOf="@+id/status_compose"
-        app:srcCompat="@drawable/ic_public_black_24dp" />
+        app:srcCompat="@drawable/ic_public_black_24dp"
+        android:layout_marginStart="12dp" />
 
     <EditText
         android:id="@+id/status_cw"
@@ -67,7 +71,7 @@
         android:visibility="visible"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteY="17dp" />
+        android:layout_marginStart="43dp" />
 
     <ToggleButton
         android:id="@+id/cwBtn"
@@ -75,10 +79,45 @@
         android:layout_width="52dp"
         android:layout_height="52dp"
         android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
         android:layout_marginTop="27dp"
         android:checked="false"
         android:textOff="CW"
         android:textOn="CW"
         app:layout_constraintLeft_toRightOf="@+id/privacy"
         app:layout_constraintTop_toBottomOf="@+id/status_compose" />
+
+    <ImageButton
+        android:id="@+id/nsfwBtn"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginLeft="11dp"
+        android:layout_marginTop="27dp"
+        app:layout_constraintLeft_toRightOf="@+id/cwBtn"
+        app:layout_constraintTop_toBottomOf="@+id/status_compose"
+        app:srcCompat="@drawable/ic_remove_red_eye_black_24dp"
+        android:layout_marginStart="11dp" />
+
+    <HorizontalScrollView
+        android:id="@+id/media_container"
+        android:layout_width="0dp"
+        android:layout_height="187dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="121dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/status_compose"
+        app:layout_constraintVertical_bias="0.159">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+
+        </LinearLayout>
+    </HorizontalScrollView>
 </android.support.constraint.ConstraintLayout>

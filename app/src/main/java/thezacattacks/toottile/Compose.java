@@ -14,7 +14,7 @@ public class Compose extends AppCompatActivity {
     private String postPrivacy;
     private boolean cw = false;
 
-    private ImageButton privacyBtn;
+    private ImageButton privacyBtn, nsfwBtn;
     private ToggleButton cwBtn;
     private View cw_text;
 
@@ -40,15 +40,19 @@ public class Compose extends AppCompatActivity {
                         switch (item.getItemId()) {
                             case R.id.vis_public:
                                 postPrivacy = "public";
+                                privacyBtn.setImageResource(R.drawable.ic_public_black_24dp);
                                 break;
                             case R.id.vis_unlisted:
                                 postPrivacy = "unlisted";
+                                privacyBtn.setImageResource(R.drawable.ic_lock_open_black_24dp);
                                 break;
                             case R.id.vis_private:
                                 postPrivacy = "private";
+                                privacyBtn.setImageResource(R.drawable.ic_lock_outline_black_24dp);
                                 break;
                             case R.id.vis_dm:
                                 postPrivacy = "direct";
+                                privacyBtn.setImageResource(R.drawable.ic_mail_black_24dp);
                                 break;
                         }
                         return false;
@@ -74,5 +78,8 @@ public class Compose extends AppCompatActivity {
 
         cw_text = findViewById(R.id.status_cw);
         cw_text.setVisibility(View.GONE);
+
+        nsfwBtn = (ImageButton) findViewById(R.id.nsfwBtn);
+        nsfwBtn.setVisibility(View.GONE);
     }
 }
