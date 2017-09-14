@@ -3,7 +3,7 @@ package thezacattacks.toottile;
 import android.content.Intent;
 import android.service.quicksettings.TileService;
 
-import static android.support.v4.content.ContextCompat.startActivity;
+//import static android.support.v4.content.ContextCompat.startActivity;
 
 /**
  * Created by zepps on 9/11/17.
@@ -43,7 +43,7 @@ public class TootTileService extends TileService {
     @Override
     public void onClick() {
         super.onClick();
-       // startActivity(new Intent(this, )); TODO: Make compose class
+        startActivityAndCollapse(new Intent(this, Compose.class));
     }
 
 }

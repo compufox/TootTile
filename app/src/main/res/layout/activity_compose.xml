@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="thezacattacks.toottile.Compose"
+    android:label="Compose New Status">
+
+    <EditText
+        android:id="@+id/status_compose"
+        android:layout_width="321dp"
+        android:layout_height="55dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="Status"
+        android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine|textLongMessage"
+        app:layout_constraintHorizontal_bias="0.507"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/status_cw"
+        tools:layout_editor_absoluteY="78dp" />
+
+    <Button
+        android:id="@+id/sendBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="52dp"
+        android:layout_marginRight="41dp"
+        android:layout_marginTop="27dp"
+        android:elevation="0dp"
+        android:text="Toot!"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/status_compose" />
+
+    <ImageButton
+        android:id="@+id/add_photo"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginLeft="42dp"
+        android:layout_marginTop="27dp"
+        android:text="Button"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/status_compose"
+        app:srcCompat="@drawable/ic_photo_camera_black_24dp" />
+
+    <ImageButton
+        android:id="@+id/privacy"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginLeft="11dp"
+        android:layout_marginTop="27dp"
+        app:layout_constraintLeft_toRightOf="@+id/add_photo"
+        app:layout_constraintTop_toBottomOf="@+id/status_compose"
+        app:srcCompat="@drawable/ic_public_black_24dp" />
+
+    <EditText
+        android:id="@+id/status_cw"
+        android:layout_width="323dp"
+        android:layout_height="55dp"
+        android:layout_marginLeft="43dp"
+        android:layout_marginTop="31dp"
+        android:ems="10"
+        android:hint="Content Warning"
+        android:inputType="text|textCapWords|textAutoCorrect|textAutoComplete"
+        android:visibility="visible"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteY="17dp" />
+
+    <ToggleButton
+        android:id="@+id/cwBtn"
+        style="@style/AppTheme"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginLeft="11dp"
+        android:layout_marginTop="27dp"
+        android:checked="false"
+        android:textOff="CW"
+        android:textOn="CW"
+        app:layout_constraintLeft_toRightOf="@+id/privacy"
+        app:layout_constraintTop_toBottomOf="@+id/status_compose" />
+</android.support.constraint.ConstraintLayout>
