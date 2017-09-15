@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                                 // TODO check for client/secret codes that already exist in prefs for this instance
                                 //  then we register/auth
 
-                                
+                                // mastoClient.postUserNameAndPassword(ID, SECRET, SCOPE, user, pass).authCode <- save
 
                                 dialog.dismiss();
                             }
