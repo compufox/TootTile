@@ -14,7 +14,7 @@ public class Compose extends AppCompatActivity {
     private String postPrivacy;
     private boolean cw = false;
 
-    private ImageButton privacyBtn, nsfwBtn;
+    private ImageButton privacyBtn, nsfwBtn, acctBtn;
     private ToggleButton cwBtn;
     private View cw_text;
 
@@ -81,5 +81,11 @@ public class Compose extends AppCompatActivity {
 
         nsfwBtn = (ImageButton) findViewById(R.id.nsfwBtn);
         nsfwBtn.setVisibility(View.GONE);
+
+        acctBtn = (ImageButton) findViewById(R.id.account_switch);
+        // TODO
+        //check to see if we have more than one instance saved
+        // in prefs and if we do then we show the chooser button
+        // maybe menu?
     }
 }
