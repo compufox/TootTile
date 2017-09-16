@@ -2,18 +2,18 @@ package thezacattacks.toottile;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.sys1yagi.mastodon4j.MastodonRequest;
-import com.sys1yagi.mastodon4j.api.entity.Status;
 import com.sys1yagi.mastodon4j.api.exception.Mastodon4jRequestException;
 import com.sys1yagi.mastodon4j.api.method.Statuses;
 
@@ -24,11 +24,15 @@ public class Compose extends AppCompatActivity {
     private String postPrivacy;
     private String postTxt;
     private boolean cw = false;
+    private int maxChars = 500;
+
+    private boolean accountLoaded = false;
 
     private ImageButton privacyBtn, nsfwBtn, acctBtn, mediaBtn;
     private Button sendBtn;
     private ToggleButton cwBtn;
-    private View cw_text;
+    private EditText statusTxt, cwTxt;
+    private TextView charCount;
 
     private Map<String, String> accounts;
 
@@ -84,13 +88,35 @@ public class Compose extends AppCompatActivity {
             }
         });
 
+        charCount = (TextView) findViewById(R.id.char_count);
+
+        cwTxt = (EditText) findViewById(R.id.status_cw);
+        cwTxt.setVisibility(View.GONE);
+        cwTxt.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                updateCharCount();
+
+                return false;
+            }
+        });
+
+        statusTxt = (EditText) findViewById(R.id.status_compose);
+        statusTxt.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                updateCharCount();
+
+                return false;
+            }
+        });
+
         sendBtn = (Button) findViewById(R.id.sendBtn);
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Statuses s = new Statuses(UtilityHelp.client);
-                EditText status = (EditText) findViewById(R.id.status_compose);
-                postTxt = status.getText().toString();
+                postTxt = statusTxt.getText().toString();
 
                 MastoPostTask post = new MastoPostTask();
                 post.execute(s);
@@ -106,14 +132,13 @@ public class Compose extends AppCompatActivity {
                 cw = cwBtn.isChecked();
 
                 if (cw)
-                    cw_text.setVisibility(View.VISIBLE);
+                    cwTxt.setVisibility(View.VISIBLE);
                 else
-                    cw_text.setVisibility(View.GONE);
+                    cwTxt.setVisibility(View.GONE);
+
+                updateCharCount();
             }
         });
-
-        cw_text = findViewById(R.id.status_cw);
-        cw_text.setVisibility(View.GONE);
 
         nsfwBtn = (ImageButton) findViewById(R.id.nsfwBtn);
         nsfwBtn.setVisibility(View.GONE);
@@ -128,7 +153,8 @@ public class Compose extends AppCompatActivity {
             disableButtons();
             UtilityHelp.displayError(findViewById(android.R.id.content),
                     "Please add an account in the main app");
-        }
+        } else
+            accountLoaded = true;
 
         // TODO
         //check to see if we have more than one instance saved
@@ -139,6 +165,20 @@ public class Compose extends AppCompatActivity {
     private void disableButtons() {
         sendBtn.setEnabled(false);
         mediaBtn.setEnabled(false);
+    }
+
+    private void updateCharCount() {
+        int curChars = statusTxt.getText().length();
+        if (cwTxt.getVisibility() == View.VISIBLE)
+            curChars += cwTxt.getText().length();
+
+        Integer left = maxChars - curChars;
+        charCount.setText(left.toString());
+
+        if (left < 0)
+            sendBtn.setEnabled(false);
+        else if (accountLoaded)
+            sendBtn.setEnabled(true);
     }
 
     private class MastoPostTask extends AsyncTask<Statuses, Void, Boolean> {

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import com.google.gson.Gson;
 import com.sys1yagi.mastodon4j.MastodonClient;
@@ -27,11 +29,12 @@ import com.sys1yagi.mastodon4j.api.exception.Mastodon4jRequestException;
 import com.sys1yagi.mastodon4j.api.method.Accounts;
 import com.sys1yagi.mastodon4j.api.method.Apps;
 
-import java.util.Map;
-
 import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
+
+    private ProgressBar accntProg;
+    private MastoRegistrationTask regTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
         if (UtilityHelp.secretPrefs == null)
             UtilityHelp.secretPrefs = getSharedPreferences("thezacattacks.tootile.instance_secrets",
                     Context.MODE_PRIVATE);
+
+        accntProg = (ProgressBar) findViewById(R.id.account_progress);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -70,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
                                 String user = txtEmail.getText().toString();
                                 String pass = txtPass.getText().toString();
 
+                                UtilityHelp.cacheCreds(user, pass);
+
                                 // TODO check for client/secret codes that already exist in prefs for this instance
                                 //  then we register/auth
                                 UtilityHelp.client = new MastodonClient.Builder(inst, new OkHttpClient.Builder(), new Gson()).build();
@@ -77,51 +84,18 @@ public class MainActivity extends AppCompatActivity {
 
                                 // if we don't already have keys for this instance, we get them
                                 if (!UtilityHelp.checkPrefsForInstance(inst)) {
-                                    AppRegistration reg;
-
-                                    MastoRegistrationTask regTask = new MastoRegistrationTask();
+                                    regTask = new MastoRegistrationTask();
                                     regTask.execute(app.createApp(
                                             "TootTile",
                                             "urn:ietf:wg:oauth:2.0:oob",
                                             new Scope(Scope.Name.WRITE),
                                             "https://github.com/theZacAttacks/TootTile"
                                     ));
-                                }
-                                
-                                try {
-                                    String[] tmp;
-                                    String clientID, clientSecret;
-                                    tmp = UtilityHelp.secretPrefs.getString(inst + "-secrets", null).split("||");
-                                    clientID = tmp[0];
-                                    clientSecret = tmp[1];
-
-                                    // TODO: move this shit into the async task
-                                    AccessToken token = app.postUserNameAndPassword(clientID,
-                                            clientSecret,
-                                            new Scope(Scope.Name.WRITE),
-                                            user,
-                                            pass).execute();
-                                    
-                                    UtilityHelp.client = new MastodonClient.Builder(inst,
-                                            new OkHttpClient.Builder(),
-                                            new Gson())
-                                            .accessToken(token.getAccessToken())
-                                            .build();
-                                    
-                                    Accounts acct = new Accounts(UtilityHelp.client);
-                                    
-                                    String accountName = acct.getVerifyCredentials().execute().getAcct();
-                                    accountName += "@" + inst;
-
-                                    SharedPreferences.Editor accessWriter = UtilityHelp.accountPrefs.edit();
-                                    accessWriter.putString(accountName, token.getAccessToken());
-                                    accessWriter.commit();
-
-                                } catch (Mastodon4jRequestException e) {
-                                    UtilityHelp.displayError(view, "Couldn't get access token :(");
+                                    accntProg.setVisibility(View.VISIBLE);
                                 }
 
-                                // mastoClient.postUserNameAndPassword(ID, SECRET, SCOPE, user, pass).authCode <- save
+                                MastoGetTokenTask getToken = new MastoGetTokenTask();
+                                getToken.execute(app);
 
                                 dialog.dismiss();
                             }
@@ -166,21 +140,30 @@ public class MainActivity extends AppCompatActivity {
             prefWriter.putString(reg.getInstanceName() + "-secrets",
                     reg.getClientId() + "||" + reg.getClientSecret());
 
-            prefWriter.commit();
+            prefWriter.apply();
         } else {
             UtilityHelp.displayError(findViewById(android.R.id.content), "Couldn't get client keys :(");
         }
     }
 
-    private class MastoRegistrationTask extends AsyncTask<MastodonRequest, Void, AppRegistration> {
-        private Exception e;
+    private void addAccessToken(AccessToken token, String accountName) {
+        accntProg.setVisibility(View.GONE);
 
+        if (token != null) {
+            SharedPreferences.Editor accessWriter = UtilityHelp.accountPrefs.edit();
+            accessWriter.putString(accountName, token.getAccessToken());
+            accessWriter.apply();
+        } else {
+            UtilityHelp.displayError(findViewById(android.R.id.content), "Couldn't get access token :(");
+        }
+    }
+
+    private class MastoRegistrationTask extends AsyncTask<MastodonRequest, Void, AppRegistration> {
         protected AppRegistration doInBackground(MastodonRequest... req) {
             MastodonRequest r = req[0];
             try {
                 return (AppRegistration) r.execute();
             } catch (Mastodon4jRequestException mE) {
-                this.e = mE;
                 return null;
             }
         }
@@ -190,9 +173,60 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class MastoGetTokenTask extends AsyncTask<MastodonRequest, Void, AccessToken> {
-        protected AccessToken doInBackground(MastodonRequest... req) {
+    private class MastoGetTokenTask extends AsyncTask<Apps, Void, AccessToken> {
+
+        private String acctName;
+        private String id, secret, inst, user, pass;
+
+        protected AccessToken doInBackground(Apps... req) {
+            do {
+                try {
+                    inst = UtilityHelp.client.getInstanceName();
+
+                    String[] tmp;
+                    tmp = UtilityHelp.secretPrefs.getString(inst + "-secrets", null).split("||");
+                    id = tmp[0];
+                    secret = tmp[1];
+
+                    tmp = UtilityHelp.getCache();
+                    user = tmp[0];
+                    pass = tmp[1];
+                } catch (Exception e) {
+                    SystemClock.sleep(500);
+                }
+            } while (regTask != null && regTask.getStatus() == Status.FINISHED);
+
             // TODO write function to run request and get/save token
+            MastodonRequest r = req[0].postUserNameAndPassword(id,
+                    secret,
+                    new Scope(Scope.Name.WRITE),
+                    user,
+                    pass);
+            try {
+                AccessToken t = (AccessToken) r.execute();
+
+                String inst = UtilityHelp.client.getInstanceName();
+
+                UtilityHelp.client = new MastodonClient.Builder(inst,
+                        new OkHttpClient.Builder(),
+                        new Gson())
+                        .accessToken(t.getAccessToken())
+                        .build();
+
+                Accounts acct = new Accounts(UtilityHelp.client);
+
+                acctName = acct.getVerifyCredentials().execute().getAcct() + "@" + inst;
+
+                return t;
+            } catch (Mastodon4jRequestException e) {
+                System.out.println(e.toString());
+                return null;
+            }
+
+        }
+
+        protected void onPostExecute(AccessToken t) {
+            addAccessToken(t, acctName);
         }
     }
 

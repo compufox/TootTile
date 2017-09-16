@@ -15,18 +15,20 @@ import okhttp3.OkHttpClient;
  * Created by sgduser on 9/15/2017.
  */
 
-public final class UtilityHelp {
+final class UtilityHelp {
 
-    public static MastodonClient client;
-    public static SharedPreferences accountPrefs;
-    public static SharedPreferences secretPrefs;
+    static MastodonClient client;
+    static SharedPreferences accountPrefs;
+    static SharedPreferences secretPrefs;
 
-    public static void displayError(View v, String msg) {
+    static private String[] credCache;
+
+    static void displayError(View v, String msg) {
         Snackbar error = Snackbar.make(v, msg, Snackbar.LENGTH_SHORT);
         error.show();
     }
 
-    public static void loadAccount(String userName) {
+    static void loadAccount(String userName) {
         String[] tmp = userName.split("@");
         String token = accountPrefs.getString(userName, null);
 
@@ -37,11 +39,22 @@ public final class UtilityHelp {
                 .build();
     }
 
-    public static boolean checkPrefsForInstance(String instance) {
+    static void cacheCreds(String... creds) {
+        credCache = creds;
+    }
+
+    static String[] getCache() {
+        String[] tmp = credCache;
+        credCache = null;
+
+        return tmp;
+    }
+
+    static boolean checkPrefsForInstance(String instance) {
         return secretPrefs.contains(instance + "-secrets");
     }
 
-    public static Map<String, ?> getAccounts() {
+    static Map<String, ?> getAccounts() {
         return accountPrefs.getAll();
     }
 
