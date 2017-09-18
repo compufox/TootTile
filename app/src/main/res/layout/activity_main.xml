@@ -33,13 +33,4 @@
         app:elevation="5dp"
         app:srcCompat="@drawable/ic_add_black_24dp" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </ScrollView>
-
 </android.support.design.widget.CoordinatorLayout>

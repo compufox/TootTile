@@ -151,7 +151,7 @@ public class Compose extends AppCompatActivity {
             acctBtn.setVisibility(View.GONE);
         if (accounts.isEmpty()) {
             disableButtons();
-            UtilityHelp.displayError(findViewById(android.R.id.content),
+            UtilityHelp.displaySnackbar(findViewById(android.R.id.content),
                     "Please add an account in the main app");
         } else
             accountLoaded = true;
@@ -204,7 +204,7 @@ public class Compose extends AppCompatActivity {
                 // we close the compose activity
                 Compose.this.finish();
             } else {
-                UtilityHelp.displayError(findViewById(android.R.id.content), "Couldn't post status D:");
+                UtilityHelp.displaySnackbar(findViewById(android.R.id.content), "Couldn't post status D:");
             }
         }
     }

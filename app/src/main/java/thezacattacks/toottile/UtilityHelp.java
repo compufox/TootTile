@@ -23,7 +23,7 @@ final class UtilityHelp {
 
     static private String[] credCache;
 
-    static void displayError(View v, String msg) {
+    static void displaySnackbar(View v, String msg) {
         Snackbar error = Snackbar.make(v, msg, Snackbar.LENGTH_SHORT);
         error.show();
     }

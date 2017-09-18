@@ -16,8 +16,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListAdapter;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.sys1yagi.mastodon4j.MastodonClient;
@@ -91,8 +95,9 @@ public class MainActivity extends AppCompatActivity {
                                             new Scope(Scope.Name.WRITE),
                                             "https://github.com/theZacAttacks/TootTile"
                                     ));
-                                    accntProg.setVisibility(View.VISIBLE);
                                 }
+
+                                accntProg.setVisibility(View.VISIBLE);
 
                                 MastoGetTokenTask getToken = new MastoGetTokenTask();
                                 getToken.execute(app);
@@ -142,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
 
             prefWriter.apply();
         } else {
-            UtilityHelp.displayError(findViewById(android.R.id.content), "Couldn't get client keys :(");
+            UtilityHelp.displaySnackbar(findViewById(android.R.id.content), "Couldn't get client keys :(");
         }
     }
 
@@ -150,11 +155,12 @@ public class MainActivity extends AppCompatActivity {
         accntProg.setVisibility(View.GONE);
 
         if (token != null) {
+            UtilityHelp.displaySnackbar(findViewById(android.R.id.content), "Access Tokens Fetched!");
             SharedPreferences.Editor accessWriter = UtilityHelp.accountPrefs.edit();
             accessWriter.putString(accountName, token.getAccessToken());
             accessWriter.apply();
         } else {
-            UtilityHelp.displayError(findViewById(android.R.id.content), "Couldn't get access token :(");
+            UtilityHelp.displaySnackbar(findViewById(android.R.id.content), "Couldn't get access token :(");
         }
     }
 
@@ -227,6 +233,34 @@ public class MainActivity extends AppCompatActivity {
 
         protected void onPostExecute(AccessToken t) {
             addAccessToken(t, acctName);
+        }
+    }
+
+    private class AccountListAdapter extends ArrayAdapter<String> {
+        private final String[] values;
+        private final Context context;
+
+        public AccountListAdapter(Context con, String[] values) {
+            super(con, -1, values);
+
+            this.values = values;
+            this.context = con;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inf = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View rowView = inf.inflate(R.layout.scroll_account_view, false);
+
+            TextView acct = (TextView) rowView.findViewById(R.id.scroll_acct_name);
+            TextView inst = (TextView) rowView.findViewById(R.id.scroll_instance_name);
+
+            String[] tmp = values[position].split("@");
+
+            acct.setText(tmp[0]);
+            inst.setText(tmp[1]);
+
+            return rowView;
         }
     }
 
