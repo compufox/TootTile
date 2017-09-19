@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressBar accntProg;
     private MastoRegistrationTask regTask;
+    private AccountListAdapter listAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +53,10 @@ public class MainActivity extends AppCompatActivity {
         if (UtilityHelp.secretPrefs == null)
             UtilityHelp.secretPrefs = getSharedPreferences("thezacattacks.tootile.instance_secrets",
                     Context.MODE_PRIVATE);
+
+        listAdapter = new AccountListAdapter(getApplicationContext(), UtilityHelp.getAccountNames());
+        ListView acctList = (ListView) findViewById(R.id.account_list);
+        acctList.setAdapter(new AccountListAdapter(this.getApplicationContext(), UtilityHelp.getAccountNames()));
 
         accntProg = (ProgressBar) findViewById(R.id.account_progress);
 
@@ -74,16 +80,15 @@ public class MainActivity extends AppCompatActivity {
                 builder.setPositiveButton("Authenticate", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //TODO change out using just the pure instance url
                                 String inst = txtInst.getText().toString();
                                 String user = txtEmail.getText().toString();
                                 String pass = txtPass.getText().toString();
 
                                 UtilityHelp.cacheCreds(user, pass);
 
-                                // TODO check for client/secret codes that already exist in prefs for this instance
-                                //  then we register/auth
-                                UtilityHelp.client = new MastodonClient.Builder(inst, new OkHttpClient.Builder(), new Gson()).build();
+                                UtilityHelp.client = new MastodonClient.Builder("https://" + inst,
+                                        new OkHttpClient.Builder(),
+                                        new Gson()).build();
                                 Apps app = new Apps(UtilityHelp.client);
 
                                 // if we don't already have keys for this instance, we get them
@@ -142,10 +147,12 @@ public class MainActivity extends AppCompatActivity {
     private void addClientKeys(AppRegistration reg) {
         if (reg != null) {
             SharedPreferences.Editor prefWriter = UtilityHelp.secretPrefs.edit();
-            prefWriter.putString(reg.getInstanceName() + "-secrets",
-                    reg.getClientId() + "||" + reg.getClientSecret());
 
-            prefWriter.apply();
+            String keys = reg.getClientId() + "||" + reg.getClientSecret();
+            String instance = reg.getInstanceName().split("https://")[0];
+            prefWriter.putString(reg.getInstanceName() + "-secrets", keys);
+
+            prefWriter.commit();
         } else {
             UtilityHelp.displaySnackbar(findViewById(android.R.id.content), "Couldn't get client keys :(");
         }
@@ -182,17 +189,26 @@ public class MainActivity extends AppCompatActivity {
     private class MastoGetTokenTask extends AsyncTask<Apps, Void, AccessToken> {
 
         private String acctName;
-        private String id, secret, inst, user, pass;
+        private String id, secret, inst, instance, user, pass;
 
         protected AccessToken doInBackground(Apps... req) {
             do {
                 try {
-                    inst = UtilityHelp.client.getInstanceName();
+                    instance = UtilityHelp.client.getInstanceName();
+                    inst = instance.substring("https://".length());
+
 
                     String[] tmp;
-                    tmp = UtilityHelp.secretPrefs.getString(inst + "-secrets", null).split("||");
+                    tmp = UtilityHelp.secretPrefs.getString(inst + "-secrets", null).split("\\|\\|");
                     id = tmp[0];
                     secret = tmp[1];
+
+                    System.out.println("=============");
+                    System.out.println(instance);
+                    System.out.println(inst);
+                    System.out.println(id);
+                    System.out.println(secret);
+                    System.out.println("=============");
 
                     tmp = UtilityHelp.getCache();
                     user = tmp[0];
@@ -202,18 +218,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             } while (regTask != null && regTask.getStatus() == Status.FINISHED);
 
-            // TODO write function to run request and get/save token
             MastodonRequest r = req[0].postUserNameAndPassword(id,
                     secret,
                     new Scope(Scope.Name.WRITE),
                     user,
                     pass);
+
+            //TODO: suck it up and make it fucking get the oauth code :sigh:
             try {
                 AccessToken t = (AccessToken) r.execute();
-
+                System.out.println("got token");
                 String inst = UtilityHelp.client.getInstanceName();
 
-                UtilityHelp.client = new MastodonClient.Builder(inst,
+                UtilityHelp.client = new MastodonClient.Builder(instance,
                         new OkHttpClient.Builder(),
                         new Gson())
                         .accessToken(t.getAccessToken())
@@ -222,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
                 Accounts acct = new Accounts(UtilityHelp.client);
 
                 acctName = acct.getVerifyCredentials().execute().getAcct() + "@" + inst;
-
+                System.out.println("got account name");
                 return t;
             } catch (Mastodon4jRequestException e) {
                 System.out.println(e.toString());
@@ -232,6 +249,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(AccessToken t) {
+            System.out.print("We got the tokens!");
             addAccessToken(t, acctName);
         }
     }
@@ -250,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inf = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View rowView = inf.inflate(R.layout.scroll_account_view, false);
+            View rowView = inf.inflate(R.layout.scroll_account_view, parent, false);
 
             TextView acct = (TextView) rowView.findViewById(R.id.scroll_acct_name);
             TextView inst = (TextView) rowView.findViewById(R.id.scroll_instance_name);

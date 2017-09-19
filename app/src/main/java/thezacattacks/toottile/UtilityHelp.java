@@ -7,6 +7,7 @@ import android.view.View;
 import com.google.gson.Gson;
 import com.sys1yagi.mastodon4j.MastodonClient;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
@@ -52,6 +53,11 @@ final class UtilityHelp {
 
     static boolean checkPrefsForInstance(String instance) {
         return secretPrefs.contains(instance + "-secrets");
+    }
+
+    static String[] getAccountNames() {
+        Object[] accts = accountPrefs.getAll().keySet().toArray();
+        return Arrays.copyOf(accts, accts.length, String[].class);
     }
 
     static Map<String, ?> getAccounts() {
