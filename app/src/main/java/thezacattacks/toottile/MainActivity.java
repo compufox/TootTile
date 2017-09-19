@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -86,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 UtilityHelp.cacheCreds(user, pass);
 
-                                UtilityHelp.client = new MastodonClient.Builder("https://" + inst,
+                                UtilityHelp.client = new MastodonClient.Builder(inst,
                                         new OkHttpClient.Builder(),
                                         new Gson()).build();
                                 Apps app = new Apps(UtilityHelp.client);
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
                                 accntProg.setVisibility(View.VISIBLE);
 
                                 MastoGetTokenTask getToken = new MastoGetTokenTask();
-                                getToken.execute(app);
+                                getToken.execute();
 
                                 dialog.dismiss();
                             }
@@ -149,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
             SharedPreferences.Editor prefWriter = UtilityHelp.secretPrefs.edit();
 
             String keys = reg.getClientId() + "||" + reg.getClientSecret();
-            String instance = reg.getInstanceName().split("https://")[0];
-            prefWriter.putString(reg.getInstanceName() + "-secrets", keys);
+            prefWriter.putString(reg.getInstanceName() + "-secrets",
+                    keys);
 
             prefWriter.commit();
         } else {
@@ -186,16 +185,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class MastoGetTokenTask extends AsyncTask<Apps, Void, AccessToken> {
+    private class MastoGetTokenTask extends AsyncTask<Void, Void, AccessToken> {
 
         private String acctName;
-        private String id, secret, inst, instance, user, pass;
+        private String id, secret, inst, user, pass;
 
-        protected AccessToken doInBackground(Apps... req) {
+        protected AccessToken doInBackground(Void... req) {
             do {
                 try {
-                    instance = UtilityHelp.client.getInstanceName();
-                    inst = instance.substring("https://".length());
+                    inst = UtilityHelp.client.getInstanceName();
 
 
                     String[] tmp;
@@ -204,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                     secret = tmp[1];
 
                     System.out.println("=============");
-                    System.out.println(instance);
+                    //System.out.println(instance);
                     System.out.println(inst);
                     System.out.println(id);
                     System.out.println(secret);
@@ -216,21 +214,24 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     SystemClock.sleep(500);
                 }
-            } while (regTask != null && regTask.getStatus() == Status.FINISHED);
+            } while (regTask != null && regTask.getStatus() != Status.FINISHED);
 
-            MastodonRequest r = req[0].postUserNameAndPassword(id,
-                    secret,
-                    new Scope(Scope.Name.WRITE),
-                    user,
-                    pass);
+            UtilityHelp.client = new MastodonClient.Builder(inst,
+                    new OkHttpClient.Builder(),
+                    new Gson()).build();
+            Apps app = new Apps(UtilityHelp.client);
 
             //TODO: suck it up and make it fucking get the oauth code :sigh:
             try {
+                MastodonRequest r = app.postUserNameAndPassword(id,
+                        secret,
+                        new Scope(Scope.Name.WRITE),
+                        user,
+                        pass);
                 AccessToken t = (AccessToken) r.execute();
                 System.out.println("got token");
-                String inst = UtilityHelp.client.getInstanceName();
 
-                UtilityHelp.client = new MastodonClient.Builder(instance,
+                UtilityHelp.client = new MastodonClient.Builder(inst,
                         new OkHttpClient.Builder(),
                         new Gson())
                         .accessToken(t.getAccessToken())
@@ -273,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
             TextView acct = (TextView) rowView.findViewById(R.id.scroll_acct_name);
             TextView inst = (TextView) rowView.findViewById(R.id.scroll_instance_name);
 
-            String[] tmp = values[position].split("@");
+            String[] tmp = values[position].split("\\@");
 
             acct.setText(tmp[0]);
             inst.setText(tmp[1]);

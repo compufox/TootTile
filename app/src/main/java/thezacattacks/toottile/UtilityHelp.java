@@ -60,6 +60,10 @@ final class UtilityHelp {
         return Arrays.copyOf(accts, accts.length, String[].class);
     }
 
+    static String getInstanceName(String uri) {
+        return uri.substring("https://".length());
+    }
+
     static Map<String, ?> getAccounts() {
         return accountPrefs.getAll();
     }
