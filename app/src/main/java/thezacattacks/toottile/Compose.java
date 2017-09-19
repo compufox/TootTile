@@ -56,6 +56,7 @@ public class Compose extends AppCompatActivity {
                 PopupMenu menu = new PopupMenu(Compose.this, privacyBtn);
 
                 // inflate the xml file
+                // TODO make this so that it doesn't use up that much memory
                 menu.getMenuInflater().inflate(R.menu.privacy_menu, menu.getMenu());
 
                 // make a new listener for the menu clicks
