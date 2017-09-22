@@ -26,8 +26,13 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:design:24.2.1'
-    compile 'com.github.sys1yagi.mastodon4j:mastodon4j:1.2.0'
+    //compile 'com.github.sys1yagi.mastodon4j:mastodon4j:1.2.0'
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
+    compile files('lib/mastodon4j.jar')
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    compile 'com.github.google:gson:1.7'
+
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }

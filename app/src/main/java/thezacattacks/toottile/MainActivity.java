@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                                     regTask.execute(app.createApp(
                                             "TootTile",
                                             "urn:ietf:wg:oauth:2.0:oob",
-                                            new Scope(Scope.Name.WRITE),
+                                            new Scope(Scope.Name.WRITE, Scope.Name.READ),
                                             "https://github.com/theZacAttacks/TootTile"
                                     ));
                                 }
@@ -225,11 +225,11 @@ public class MainActivity extends AppCompatActivity {
             try {
                 MastodonRequest r = app.postUserNameAndPassword(id,
                         secret,
-                        new Scope(Scope.Name.WRITE),
+                        new Scope(Scope.Name.WRITE, Scope.Name.READ),
                         user,
                         pass);
                 AccessToken t = (AccessToken) r.execute();
-                System.out.println("got token");
+                System.out.println(t.getAccessToken());
 
                 UtilityHelp.client = new MastodonClient.Builder(inst,
                         new OkHttpClient.Builder(),
