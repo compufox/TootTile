@@ -163,6 +163,7 @@ public class Compose extends AppCompatActivity {
     }
 
     private void loadAccounts() {
+        setPrefsAndClient();
         acctBtn = (ImageButton) findViewById(R.id.accountBtn);
 
         accounts = (Map<String, String>) UtilityHelp.getAccounts();
@@ -200,7 +201,7 @@ public class Compose extends AppCompatActivity {
             UtilityHelp.secretPrefs = getSharedPreferences("thezacattacks.tootile.instance_secrets",
                     Context.MODE_PRIVATE);
 
-        if (UtilityHelp.client == null) {
+        if (UtilityHelp.client == null && accountLoaded) {
 
             //TODO: for the love of god make this better
 
