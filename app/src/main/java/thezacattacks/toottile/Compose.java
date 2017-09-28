@@ -50,9 +50,6 @@ public class Compose extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compose);
 
-        loadAccounts();
-        setPrefsAndClient();
-
         privacyBtn = (ImageButton) findViewById(R.id.privacyBtn);
         privacyBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,6 +152,9 @@ public class Compose extends AppCompatActivity {
         //check to see if we have more than one instance saved
         // in prefs and if we do then we show the chooser button
         // maybe menu?
+
+        loadAccounts();
+        setClient();
     }
 
     private void disableButtons() {
@@ -163,7 +163,7 @@ public class Compose extends AppCompatActivity {
     }
 
     private void loadAccounts() {
-        setPrefsAndClient();
+        setPrefs();
         acctBtn = (ImageButton) findViewById(R.id.accountBtn);
 
         accounts = (Map<String, String>) UtilityHelp.getAccounts();
@@ -193,7 +193,7 @@ public class Compose extends AppCompatActivity {
             sendBtn.setEnabled(true);
     }
 
-    private void setPrefsAndClient() {
+    private void setPrefs() {
         if (UtilityHelp.accountPrefs == null)
             UtilityHelp.accountPrefs = getSharedPreferences("thezacattacks.toottile.accounts",
                     Context.MODE_PRIVATE);
@@ -201,6 +201,9 @@ public class Compose extends AppCompatActivity {
             UtilityHelp.secretPrefs = getSharedPreferences("thezacattacks.tootile.instance_secrets",
                     Context.MODE_PRIVATE);
 
+    }
+
+    private void setClient() {
         if (UtilityHelp.client == null && accountLoaded) {
 
             //TODO: for the love of god make this better

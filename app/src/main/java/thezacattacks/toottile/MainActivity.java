@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar accntProg;
     private MastoRegistrationTask regTask;
     private AccountListAdapter listAdapter;
+    private FloatingActionButton addAccountBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +63,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        addAccountBtn = (FloatingActionButton) findViewById(R.id.fab);
+        addAccountBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -106,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
                                 MastoGetTokenTask getToken = new MastoGetTokenTask();
                                 getToken.execute();
 
+                                addAccountBtn.setEnabled(false);
                                 dialog.dismiss();
                             }
                         })
@@ -158,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addAccessToken(AccessToken token, String accountName) {
+        addAccountBtn.setEnabled(true);
         accntProg.setVisibility(View.GONE);
 
         if (token != null) {
